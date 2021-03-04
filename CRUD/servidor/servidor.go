@@ -1,6 +1,7 @@
 package servidor
 
 import (
+	"crud/banco"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,7 +14,7 @@ type usuario struct {
 	Email string `json:"email`
 }
 
-//CriarUsario insere um usuario no bando de dados
+//CriarUsuario insere um usuario no banco de dados
 func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 	corpoRequisicao, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
@@ -28,6 +29,33 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(usuario)
+	db, erro := banco.Conectar()
+	if erro != nil {
+		w.Write([]byte("Erro ao conectar ao banco de dados!"))
+		return
+	}
+	defer db.Close()
+
+	statement, erro := db.Prepare("insert into usuarios (nome, email) values (?, ?)")
+	if erro != nil {
+		w.Write([]byte("Erro ao criar o statement"))
+		return
+	}
+	defer statement.Close()
+
+	insercao, erro := statement.Exec(usuario.Nome, usuario.Email)
+	if erro != nil {
+		w.Write([]byte("Erro ao executar o statement"))
+		return
+	}
+
+	idInserido, erro := insercao.LastInsertId()
+	if erro != nil {
+		w.Write([]byte("Erro ao obter o ID"))
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(fmt.Sprintf("Usuario inserido com sucesso! ID: %d", idInserido)))
 
 }
