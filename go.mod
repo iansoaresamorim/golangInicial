@@ -1,5 +1,3 @@
-module linha-de-comando
+module main
 
 go 1.15
-
-require github.com/urfave/cli v1.22.5

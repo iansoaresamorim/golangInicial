@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crud/servidor"
 	"log"
 	"net/http"
 
@@ -9,9 +10,7 @@ import (
 
 func main() {
 	router := mux.NewRouter()
-	router.HandleFunc("/usuarios", func(w http.ResponseWriter, r *http.Request) {
-
-	}).Methods(http.MethodPost)
+	router.HandleFunc("/usuarios", servidor.CriarUsuario).Methods(http.MethodPost)
 
 	log.Fatal(http.ListenAndServe(":5000", router))
 
